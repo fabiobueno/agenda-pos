@@ -8,9 +8,14 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import com.fib.agenda.db.Contato
+import com.fib.agenda.db.ContatoRepository
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+
+    private var contatos:ArrayList<Contato>? = null
+    private var contatoSelecionado:Contato? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,11 +24,6 @@ class MainActivity : AppCompatActivity() {
         val myToolbar = toolbar
         myToolbar.setTitleTextColor(Color.WHITE)
         setSupportActionBar(myToolbar)
-
-        val contatos = arrayOf("Maria", "José", "Carlos")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, contatos)
-        var listaContatos = lista
-        listaContatos.setAdapter(adapter)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -52,6 +52,21 @@ class MainActivity : AppCompatActivity() {
             }
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        contatos = ContatoRepository(this).findAll()
+        val adapter= ArrayAdapter(this, android.R.layout.simple_list_item_1, contatos)
+        lista?.adapter = adapter
+        adapter.notifyDataSetChanged()
+
+        lista.setOnItemClickListener { _, _, position, id ->
+            val intent = Intent(this, ContatoActivity::class.java)
+            intent.putExtra("contato", contatos?.get(position))
+            startActivity(intent)
+        }
+
     }
 
 
